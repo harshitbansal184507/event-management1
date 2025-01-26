@@ -2,7 +2,7 @@
 from flask import *
 import datetime
 import hashlib
-from Session21C import MongoDBHelper
+from db_utils import MongoDBHelper
 from bson.objectid import ObjectId
 
 web_app = Flask("event Management App")
