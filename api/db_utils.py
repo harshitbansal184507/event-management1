@@ -8,12 +8,12 @@ class MongoDBHelper:
         uri = "mongodb+srv://swastikverma004:swastik..@cluster0.ljcikh6.mongodb.net/?appName=Cluster0"
 
         # Only if you face SSL error
-       # ca = certifi.where()
+        ca = certifi.where()
 
         # Create a new client and connect to the server
-        # client = MongoClient(uri, server_api=ServerApi('1'))
+        client = MongoClient(uri, server_api=ServerApi('1'))
 
-        # Only if you face SSL error, add -> tlsCAFile=ca
+        tlsCAFile=ca
         client = MongoClient(uri, server_api=ServerApi('1'))  
 
         # Send a ping to confirm a successful connection
