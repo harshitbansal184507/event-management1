@@ -2,58 +2,59 @@
 from flask import *
 import datetime
 import hashlib
-from db_utils import MongoDBHelper
+from . import db_utils
 from bson.objectid import ObjectId
 
-web_app = Flask("event Management App")
+app = Flask(__name__)
+app.secret_key = "doctors-app-key-v1"
 
 # Create the Object of Flask
 # Which represents a Web Applicatio
 
-db_helper = MongoDBHelper()
+db_helper = db_utils.MongoDBHelper()
 
-@web_app.route("/") # Decorator
+@app.route("/") # Decorator
 def index():
     return render_template("index.html")
 
-@web_app.route("/contact")
+@app.route("/contact")
 def contact():
     return render_template("contact.html")
 
-@web_app.route("/admin")
+@app.route("/admin")
 def admin():
     return render_template("signinadmin.html")
 
-@web_app.route("/a_register")
+@app.route("/a_register")
 def signupadmin():
     return render_template("signupadmin.html")
 
-@web_app.route("/forgotpass")
+@app.route("/forgotpass")
 def forgotpass():
     return render_template("forgotpassword.html")   
 
-@web_app.route("/user")
+@app.route("/user")
 def user():
     return render_template("signinmain.html")
 
-@web_app.route("/addimg")
+@app.route("/addimg")
 def addimg():
     return render_template('image.html')
 
 
 
-@web_app.route("/profile")
+@app.route("/profile")
 def profile():
      if len(session["email"]) != 0:
         return render_template("profile.html", name=session["name"], email=session["email"])
      else:
         return redirect("/")
 
-@web_app.route("/venue")
+@app.route("/venue")
 def venue():
     return render_template("venue.html")
 
-@web_app.route("/registration")
+@app.route("/registration")
 def registration():
     if len(session["email"])==0:
         return redirect("/")
@@ -74,11 +75,11 @@ def registration():
         return render_template("registration.html", events=result, 
                                name=session["name"], email=session["email"])
 
-@web_app.route("/create_event")
+@app.route("/create_event")
 def create_event():
     return render_template("createvent.html")
 
-@web_app.route("/feed")
+@app.route("/feed")
 def feed():
     if len(session["email"])==0:
         return redirect("/")
@@ -99,44 +100,44 @@ def feed():
         return render_template("feedback.html", events=result,
                                name=session["name"], email=session["email"])
 
-@web_app.route("/aprofile")
+@app.route("/aprofile")
 def aprofile():
      if len(session["email"]) != 0:
         return render_template("a_profile.html", name=session["name"], email=session["email"])
      else:
         return redirect("/")
 
-@web_app.route("/register")
+@app.route("/register")
 def register():
     return render_template("signupmain.html")
 
-@web_app.route("/home")
+@app.route("/home")
 def home():
     return render_template("dashboard.html", name=session["name"], email=session["email"])
 
-@web_app.route("/success")
+@app.route("/success")
 def success():
     return render_template("success.html", name=session["name"], email=session["email"])
 
-@web_app.route("/adashboard")
+@app.route("/adashboard")
 def adashboard():
     return render_template("a_dashboard.html")
 
 
 
-@web_app.route("/error")
+@app.route("/error")
 def error():
     name = session.get("name", "Guest")
     email = session.get("email", "N/A")
     return render_template("error.html", name=name, email=email)
 
-@web_app.route("/logout")
+@app.route("/logout")
 def logout():
     session.clear()  # Clear all session data
     return redirect("/")
 
 #-----------------------------------for user login and signup -------------------------------------------------
-@web_app.route("/add-user", methods=["POST"])
+@app.route("/add-user", methods=["POST"])
 def add_user_in_db():
     user_data = {
         "name": request.form["name"],
@@ -156,7 +157,7 @@ def add_user_in_db():
     session['email'] = user_data["email"]
     return render_template("dashboard.html", name=session['name'], email=session['email'])
 
-@web_app.route("/fetch-user", methods=["POST"])
+@app.route("/fetch-user", methods=["POST"])
 def feth_user_from_db():
     user_data = {
         "email": request.form["email"],
@@ -179,7 +180,7 @@ def feth_user_from_db():
                                name=session.get("name", "Guest"), email=session.get("email", "N/A"))
 
 #-------------------------for admin login and sign up-----------------------------------------------------------
-@web_app.route("/add-admin", methods=["POST"])
+@app.route("/add-admin", methods=["POST"])
 def add_userr_in_db():
     user_data = {
         "name": request.form["name"],
@@ -199,7 +200,7 @@ def add_userr_in_db():
     session['email'] = user_data["email"]
     return render_template("a_dashboard.html", name=session['name'], email=session['email'])
 
-@web_app.route("/a_fetch-user", methods=["POST"])
+@app.route("/a_fetch-user", methods=["POST"])
 def fetch_user_from_db():
     user_data = {
         "email": request.form["email"],
@@ -223,7 +224,7 @@ def fetch_user_from_db():
 
 #--------------------------add event-----------------------------------------------------------------------------
 
-@web_app.route("/add-event", methods=["POST"])
+@app.route("/add-event", methods=["POST"])
 def add_event_in_db():
 
     # Create a Dictionary with Data from HTML Register Form
@@ -247,7 +248,7 @@ def add_event_in_db():
 
 #----------------------------fetch events-----------------------------------------------------
 
-@web_app.route("/fetch-event")
+@app.route("/fetch-event")
 def fetch_event_from_db():
 
     if len(session["email"])==0:
@@ -272,7 +273,7 @@ def fetch_event_from_db():
         return render_template("error.html", message=" No upcoming events",
                                name=session["name"], email=session["email"])
     
-@web_app.route("/eventmain")
+@app.route("/eventmain")
 def fetch_events_from_db():
 
     if len(session["email"])==0:
@@ -298,7 +299,7 @@ def fetch_events_from_db():
                                name=session["name"], email=session["email"])
     
 
-@web_app.route("/delete-event/<id>")
+@app.route("/delete-event/<id>")
 def delete_patient(id):
     print("event to be deleted:", id)
     query = {"_id": ObjectId(id)}
@@ -308,7 +309,7 @@ def delete_patient(id):
                            name=session["name"], email=session["email"])
 
 
-@web_app.route("/update/<id>")
+@app.route("/update/<id>")
 def update_event(id):
     print("event to be updated:", id)
     
@@ -331,7 +332,7 @@ def update_event(id):
                            email=session["email"], 
                            event=patient_doc)
 
-@web_app.route("/update-event", methods=["POST"])
+@app.route("/update-event", methods=["POST"])
 def update_patient_in_db():
 
     # Create a Dictionary with Data from HTML Register Form
@@ -355,7 +356,7 @@ def update_patient_in_db():
                            name=session["name"], email=session["email"])
 
 #------------------------------------------registrations--------------------------------------
-@web_app.route("/add-register", methods=["POST"])
+@app.route("/add-register", methods=["POST"])
 def add_register_in_db():
 
     # Create a Dictionary with Data from HTML Register Form
@@ -375,7 +376,7 @@ def add_register_in_db():
     return render_template("success.html", message = "congratulations!.. your registeration is Successfully done!",
                            name=session["name"], email=session["email"])
 
-@web_app.route("/fetch-register")
+@app.route("/fetch-register")
 def fetch_register_from_db():
 
     if len(session["email"])==0:
@@ -401,7 +402,7 @@ def fetch_register_from_db():
                                name=session["name"], email=session["email"])
 #----------------------------------------feedbacks--------------------------------------
 
-@web_app.route("/add-feedback", methods=["POST"])
+@app.route("/add-feedback", methods=["POST"])
 def add_feed_in_db():
 
     # Create a Dictionary with Data from HTML Register Form
@@ -422,7 +423,7 @@ def add_feed_in_db():
     return render_template("success.html", message = "thankss for rating us..!",
                            name=session["name"], email=session["email"])
 
-@web_app.route("/analyse")
+@app.route("/analyse")
 def fetch_feed_from_db():
 
     if len(session["email"])==0:
@@ -450,11 +451,11 @@ def fetch_feed_from_db():
 def main():
 
     # In order to use Session Tracking, create a Secret Key
-    web_app.secret_key = "doctors-app-key-v1"
+    app.secret_key = "doctors-app-key-v1"
 
     # Run the App infinitely, till user wont quite
-    web_app.run()
-    # web_app.run(port=5001) # optionally you can give the port number
+    app.run()
+    # app.run(port=5001) # optionally you can give the port number
 
 if __name__ == "__main__":
     main()
